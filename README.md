@@ -101,9 +101,11 @@ The remaining admin panel features will be added in future updates.
 ## 📂 Project Structure
 
 ```
-Admin/
-Backend/
-Frontend/
+Portfolio/
+├──Admin/      # Admin dashboard (React)
+├──Backend/    # Express.js API & MongoDB
+└──Frontend/   # Portfolio website (React)
+
 
 ```
 
@@ -114,15 +116,15 @@ Frontend/
 ### Clone Repository
 
 ```bash
-git clone https://github.com/your-username/your-repository.git
+git clone https://github.com/Krishan-Das/portfolio-website.git
 ```
 
 ### Install Dependencies
 
-Frontend
+Admin
 
 ```bash
-cd Frontend
+cd Admin
 npm install
 ```
 
@@ -132,6 +134,14 @@ Backend
 cd Backend
 npm install
 ```
+
+Frontend
+
+```bash
+cd Frontend
+npm install
+```
+
 
 ### Environment Variables
 
@@ -149,6 +159,12 @@ REFRESH_TOKEN_SECRET=your_secret
 ```
 
 ### Run
+
+Admin
+
+```bash
+npm run dev
+```
 
 Backend
 
