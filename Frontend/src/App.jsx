@@ -12,6 +12,11 @@ import ProjectSection from './components/ProjectSection';
 import SkillSection from './components/SkillSection';
 import ContactSection from './components/ContactSection';
 
+// project images
+import advAuthPic from "./assets/projects_image/Advanced_Auth.png"
+import mernEcommercePic from "./assets/projects_image/mern_e_commerce.png"
+import mernGaleryPic from "./assets/projects_image/mern_galery.png"
+
 export default function App() {
 
   // --- ScroolBar Top ---
@@ -33,7 +38,7 @@ export default function App() {
       title: "E-Commerce Platform", 
       desc: "A modern headless commerce solution built with React.", 
       tech: "React, Tailwind, Node.js",
-      image: "../src/assets/projects_image/mern_e_commerce.png" 
+      image: mernEcommercePic
     },
 
     { 
@@ -41,7 +46,7 @@ export default function App() {
       title: "Galery App (MERN)", 
       desc: "Real-time analytics platform with predictive insights.", 
       tech: "Node.js, React.js, Tailwind CSS", 
-      image: "../src/assets/projects_image/mern_galery.png", 
+      image: mernGaleryPic, 
       github: "https://github.com/Krishan-Das/galery-full-stack-proj-1-.git" 
     },
 
@@ -50,7 +55,7 @@ export default function App() {
       title: "Advanced Authentication", 
       desc: "A production-inspired authentication system built with Node.js, Express.js, MongoDB, and JWT.", 
       tech: "Node.js, MongoDB, Express.js", 
-      image: "../src/assets/projects_image/Advanced_Auth.png", 
+      image: advAuthPic,
       github: "https://github.com/Krishan-Das/Advanced_authentication.git" 
     }
   ]);
