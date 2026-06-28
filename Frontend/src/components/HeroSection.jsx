@@ -2,6 +2,8 @@ import React from 'react'
 import { TypeAnimation } from "react-type-animation";
 import { ArrowRight, Download, ChevronDown } from "lucide-react";
 
+import ProfilePic from "../assets/Profile.jpeg"
+
 const HeroSection = ({profile}) => {
   return (
     <section
@@ -189,7 +191,7 @@ const HeroSection = ({profile}) => {
               <div className="relative rounded-[32px] border border-slate-800 bg-slate-900/70 backdrop-blur-xl p-3 shadow-2xl">
 
                 <img
-                  src="../src/assets/Profile.jpeg"
+                  src={ProfilePic}
                   alt={profile.name}
                   className="w-[330px] h-[430px] md:w-[390px] md:h-[500px] rounded-[24px] object-cover transition duration-500 hover:scale-[1.03]"
                 />
