@@ -6,11 +6,11 @@ A modern and professional portfolio website built with the MERN stack.
 
 This repository currently contains the frontend design and the initial backend setup. The website is **not fully dynamic yet**. My goal is to gradually transform it into a complete full-stack portfolio with an admin dashboard for managing all content.
 
-```
+<!--
 ## 🚀 Live Demo
 
 🌐 https://krishan-portfolio-rkora.netlify.app
-```
+-->
 ## 📸 Preview
 
 ![Portfolio Preview](./screenshots/homepage.png)
