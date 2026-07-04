@@ -13,12 +13,10 @@ This repository currently contains the frontend design and the initial backend s
 -->
 ## 📸 Preview
 
-![Portfolio Preview](./screenshots/homepage.png)
-
----
-![Portfolio Preview](./screenshots/projectpage.png)
-
----
+<p align="center">
+  <img src="./screenshots/homepage.png" alt="Homepage Preview" width="48%" />
+  <img src="./screenshots/projectpage.png" alt="Project Page Preview" width="48%" />
+</p>
 
 ## ✨ Features
 
