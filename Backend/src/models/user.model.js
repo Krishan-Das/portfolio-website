@@ -27,8 +27,19 @@ const userSchema = new mongoose.Schema({
   },
 
   avatar: {
+    url: {
+      type: String,
+      default: ""
+    },
+    fileId: {
+      type: String,
+      default: ""
+    }
+  },
+
+  bio: {
     type: String,
-    default: null
+    default: "Portfolio website || RKora"
   }
 },
   {

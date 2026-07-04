@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Profile from "./assets/Profile.jpeg"; // নিজের path অনুযায়ী change করো
+
 
 import {
   User, Briefcase, Code, Mail, Settings,
@@ -124,7 +124,7 @@ export default function App() {
 
       <>
         <Navbar profile={profile} />
-        <HeroSection profile={profile} />
+        <HeroSection />
         <ProjectSection projects={projects} />
         <SkillSection skills={skills} />
         <ContactSection profile={profile} />

@@ -1,10 +1,15 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { TypeAnimation } from "react-type-animation";
 import { ArrowRight, Download, ChevronDown } from "lucide-react";
+import {AuthContext} from "../context/AuthContext.jsx"
 
 import ProfilePic from "../assets/Profile.jpeg"
 
-const HeroSection = ({profile}) => {
+const HeroSection = () => {
+  const {user} = useContext(AuthContext);
+  
+
+  
   return (
     <section
       id="home"
@@ -55,7 +60,7 @@ const HeroSection = ({profile}) => {
             <h1 className="mt-2 text-5xl md:text-7xl font-black tracking-tight leading-tight">
 
               <span className="text-white">
-                {profile.name}
+                {user?.username}
               </span>
 
             </h1>
@@ -101,12 +106,7 @@ const HeroSection = ({profile}) => {
 
             <p className="mt-8 max-w-2xl text-slate-400 text-lg leading-8">
 
-              Computer Science & Engineering student passionate about building
-              modern web applications and solving real-world problems.
-
-              Currently focusing on building production-ready projects while
-              improving my Backend Development, MERN Stack, Flutter,
-              Data Structures & Algorithms, and exploring AI/ML.
+              {user?.bio}
 
             </p>
 
@@ -191,8 +191,8 @@ const HeroSection = ({profile}) => {
               <div className="relative rounded-[32px] border border-slate-800 bg-slate-900/70 backdrop-blur-xl p-3 shadow-2xl">
 
                 <img
-                  src={ProfilePic}
-                  alt={profile.name}
+                  src={user?.avatar?.url}
+                  alt={user?.username}
                   className="w-[330px] h-[430px] md:w-[390px] md:h-[500px] rounded-[24px] object-cover transition duration-500 hover:scale-[1.03]"
                 />
 
