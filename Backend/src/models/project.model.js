@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const projectSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: [true, "Project must belong to a user"],
+    },
     title: {
       type: String,
       required: [true, "Project title is required"],

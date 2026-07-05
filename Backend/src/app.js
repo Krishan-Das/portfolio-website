@@ -1,5 +1,6 @@
 import express from "express"
 import authRouter from "./routes/auth.routes.js";
+import projectRouter from "./routes/project.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors"
 
@@ -20,6 +21,7 @@ app.use(
 
 
 app.use("/api/auth", authRouter);
+app.use("/api/project", projectRouter);
 
 
 export default app;

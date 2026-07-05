@@ -37,7 +37,7 @@ const Dashboard = () => {
 
   // --- STATE MANAGEMENT ---
   const [isAdmin, setIsAdmin] = useState(false);
-  const [activeTab, setActiveTab] = useState('projects');
+  const [activeTab, setActiveTab] = useState('profile');
 
 
   // --- Scroll Progress ---
