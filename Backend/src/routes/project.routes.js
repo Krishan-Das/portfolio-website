@@ -9,4 +9,10 @@ const upload = multer({storage: multer.memoryStorage()})
 
 projectRouter.post("/create", upload.single("image"), authenticate, projectController.createPost);
 
+projectRouter.get("/fetch", authenticate, projectController.fetchPost);
+
+projectRouter.patch("/update/:id", authenticate, projectController.updatePost);
+
+projectRouter.delete("/delete/:id", authenticate, projectController.deletePost);
+
 export default projectRouter;
