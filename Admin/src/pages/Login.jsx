@@ -21,7 +21,6 @@ function Login() {
 
     try {
       const data = await loginUser(formData);
-      console.log(data);
           
       setUser(data.user);
       setAccessToken(data.accessToken);

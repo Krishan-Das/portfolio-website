@@ -3,7 +3,7 @@ import projectModel from "../models/project.model.js"
 
 
 export async function createPost(req, res) {
-  const { title, description, technologies, githubUrl, liveUrl, featured, images } = req.body;
+  const { title, description, technologies, githubUrl, liveUrl, featured } = req.body;
   const userId = req.user.id;
 
   if (!userId) {
@@ -20,22 +20,25 @@ export async function createPost(req, res) {
 
   try {
     const file = req.file;
+    if (!file) {
+  return res.status(400).json({
+    message: "Project image is required"
+  });
+}
 
-    let uploadedImages = [];
+    const uploadResponse = await uploadFile(
+      file,
+      file.originalname,
+      userId,
+      "portfolio/projects"
+    );
 
-    if (file) {
-      const uploadResponse = await uploadFile(
-        file,
-        file.originalname,
-        userId,
-        "portfolio/projects"
-      );
+    if (!uploadResponse) {
+    return res.status(500).json({
+        message: "Image upload failed"
+    });
+}
 
-      uploadedImages.push({
-        url: uploadResponse.url,
-        fileId: uploadResponse.fileId,
-      });
-    }
 
     const newProject = new projectModel({
       user: userId,
@@ -45,7 +48,10 @@ export async function createPost(req, res) {
       githubUrl,
       liveUrl,
       featured: featured === "true" || featured === true,
-      images: uploadedImages,
+      image: {
+        url: uploadResponse.url,
+        fileId: uploadResponse.fileId
+      },
     });
 
     const savedProject = await newProject.save();

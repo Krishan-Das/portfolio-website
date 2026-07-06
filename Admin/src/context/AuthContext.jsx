@@ -17,8 +17,8 @@ export function AuthProvider({ children }) {
        
         const response = await refreshToken();
         
-        setAccessToken(response.data.accessToken); 
-        setUser(response.data.user);
+        setAccessToken(response.data?.accessToken); 
+        setUser(response.data?.user);
         
       } catch (error) {
         console.log("Session expired or no refresh token found");

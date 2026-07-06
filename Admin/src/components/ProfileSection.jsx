@@ -13,7 +13,7 @@ const ProfileSection = () => {
   const [role, setRole] = useState('user'); // default schema fallback
   
   // Avatar handling
-  const [avatarPreview, setAvatarPreview] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
   
   const [saving, setSaving] = useState(false);
