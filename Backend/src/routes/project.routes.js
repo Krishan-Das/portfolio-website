@@ -11,7 +11,7 @@ projectRouter.post("/create", upload.single("image"), authenticate, projectContr
 
 projectRouter.get("/fetch", authenticate, projectController.fetchPost);
 
-projectRouter.patch("/update/:id", authenticate, projectController.updatePost);
+projectRouter.patch("/update/:id", upload.single("image"), authenticate, projectController.updatePost);
 
 projectRouter.delete("/delete/:id", authenticate, projectController.deletePost);
 

@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Plus, Trash2, FolderGit2, Link, Star, Image, X, Code, Eye, Edit2, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import ProjectCard from './ProjectSection/ProjectCard';
 import LoaderRK from '../components/Loader';
+import axios from 'axios';
 
 const ProjectSection = () => {
   const { accessToken } = useAuth();
@@ -27,18 +28,29 @@ const ProjectSection = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  const [projects, setProjects] = useState([
-    {
-      _id: "1",
-      title: "E-Commerce Platform",
-      description: "A modern headless commerce solution built with React.",
-      technologies: ["React", "Tailwind", "Node.js"],
-      githubUrl: "https://github.com",
-      liveUrl: "https://live.com",
-      featured: true,
-      images: ["https://api.dicebear.com/7.x/shapes/svg?seed=Ecommerce"],
-    },
-  ]);
+
+  // --- Your Project section ---
+  const [projects, setProjects] = useState([]);
+  useEffect(() => {
+
+    const fetchProject = async () => {
+      try {
+        setIsLoading(true)
+        const response = await api.get("/project/fetch", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (response) {
+          setProjects(response.data.projects)
+        }
+      } catch (error) {
+        console.error(error)
+      }finally{
+        setIsLoading(false)
+      }
+    }
+    fetchProject()
+  },[])
+
 
   // Handle inputs
   const handleChange = (e) => {
@@ -88,24 +100,20 @@ const ProjectSection = () => {
 
   // Set form values to edit an existing project
   const handleEditClick = (project) => {
-    return toast("upcomming feature", {
-      duration: 800,
-      position: "bottom-center"
-    })
 
     setEditingId(project._id);
     setFormData({
       title: project.title,
       description: project.description,
       technologies: project.technologies.join(", "),
-      githubUrl: project.githubUrl || "",
+      githubUrl: project.githubUrl || "https://github.com/Krishan-Das",
       liveUrl: project.liveUrl || "",
       featured: project.featured || false,
     });
 
     // Set preview if the project already has an image uploaded
-    if (project.images && project.images.length > 0) {
-      setImagePreview(project.images[0]);
+    if (project.image) {
+      setImagePreview(project.image.url);
     } else {
       setImagePreview(null);
     }
@@ -129,7 +137,7 @@ const ProjectSection = () => {
     const uploadData = new FormData();
     uploadData.append("title", formData.title);
     uploadData.append("description", formData.description);
-    uploadData.append("githubUrl", formData.githubUrl);
+    uploadData.append("githubUrl", formData.githubUrl ? formData.githubUrl :"https://github.com/Krishan-Das");
     uploadData.append("liveUrl", formData.liveUrl);
     uploadData.append("featured", formData.featured);
 
@@ -142,11 +150,12 @@ const ProjectSection = () => {
     }
 
     try {
+      setIsLoading(true);
       setLoaderMessage(editingId ? "Updating project..." : "Creating project...");
       // --- Update functionality ---
       if (editingId) {
         // --- UPDATE EXISTING PROJECT ---
-        const response = await api.put(`/project/update/${editingId}`, uploadData, {
+        const response = await api.patch(`/project/update/${editingId}`, uploadData, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
 
@@ -157,15 +166,12 @@ const ProjectSection = () => {
       } else {
         // --- Create new project 😘 ---
 
-        setIsLoading(true);
         const response = await api.post("/project/create", uploadData, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
 
         setProjects((prev) => [response.data.project, ...prev]);
         toast.success("Project created successfully");
-
-
       }
 
       resetForm();
@@ -179,32 +185,28 @@ const ProjectSection = () => {
 
   // Delete Project
   const handleDeleteProj = async (id) => {
-    toast("Upcomming feature", {
-      duration: 800,
-      position: "bottom-center"
-    });
-    return;
+    if(!id) return;
     if (!window.confirm("Are you sure you want to delete this project?")) return;
 
-    // try {
-    //   await api.delete(`/project/delete/${id}`, {
-    //     headers: { Authorization: `Bearer ${accessToken}` },
-    //   });
+    try {
+      await api.delete(`/project/delete/${id}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
-    //   setProjects((prev) => prev.filter((proj) => proj._id !== id));
-    //   toast.success("Project deleted successfully.");
+      setProjects((prev) => prev.filter((proj) => proj._id !== id));
+      toast.success("Project deleted successfully.");
 
-    //   // If we were editing the project that just got deleted, reset the form
-    //   if (editingId === id) resetForm();
-    // } catch (error) {
-    //   console.error(error);
-    //   toast.error(error.response?.data?.message || "Failed to delete project");
-    // }
+      // If we were editing the project that just got deleted, reset the form
+      if (editingId === id) resetForm();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to delete project");
+    }
   };
 
   return (
     <>
-      <LoaderRK show={isLoading} message={loaderMessage}/>
+      <LoaderRK show={isLoading} message={loaderMessage} />
       <section className="flex flex-col gap-8 max-w-3xl mx-auto p-4 text-slate-200">
 
         {/* 🛠️ ADD / UPDATE PROJECT BOX */}
@@ -228,9 +230,11 @@ const ProjectSection = () => {
                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Project Title *</label>
                 <input type="text" name="title" required value={formData.title} onChange={handleChange} placeholder="e.g. AI SaaS Engine" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 outline-none transition-all" />
               </div>
+
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tech Stack</label>
-                <input type="text" name="technologies" value={formData.technologies} onChange={handleChange} placeholder="React, Node.js, MongoDB" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 outline-none transition-all" />
+                <input 
+                type="text" name="technologies" value={formData.technologies} onChange={handleChange} placeholder="React, Node.js, MongoDB" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 outline-none transition-all" />
               </div>
             </div>
 
@@ -244,8 +248,9 @@ const ProjectSection = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><FolderGit2 size={13} /> GitHub Link</label>
-                <input type="url" name="githubUrl" value={formData.githubUrl} onChange={handleChange} placeholder="https://github.com/..." className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 outline-none transition-all" />
+                <input type="url" name="githubUrl" value={formData.githubUrl} onChange={handleChange} placeholder="https://github.com/Krishan-Das" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 outline-none transition-all" />
               </div>
+
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Link size={13} /> Live Preview Link</label>
                 <input type="url" name="liveUrl" value={formData.liveUrl} onChange={handleChange} placeholder="https://myproject.com" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 outline-none transition-all" />
@@ -310,15 +315,17 @@ const ProjectSection = () => {
             Your Projects ({projects.length})
           </h3>
 
-          <div className="flex flex-col divide-y divide-slate-800/60">
-            {projects.map((project) => (
-              <ProjectCard key={project._id} project={project} editingId={editingId} handleEditClick={handleEditClick} handleDeleteProj={handleDeleteProj} />
-            ))}
+          {
+            !isLoading && (<div className="flex flex-col divide-y divide-y-4 divide-slate-800/80">
+              {projects.map((project) => (
+                <ProjectCard key={project._id} project={project} editingId={editingId} handleEditClick={handleEditClick} handleDeleteProj={handleDeleteProj} />
+              ))}
 
-            {projects.length === 0 && (
-              <p className="text-xs text-slate-500 text-center py-8">No projects found. Add one above!</p>
-            )}
-          </div>
+              {projects.length === 0 && (
+                <p className="text-xs text-slate-500 text-center py-8">No projects found.</p>
+              )}
+            </div>)
+          }
         </div>
       </section>
     </>
