@@ -1,33 +1,59 @@
-import React, { createContext, useState } from 'react'
-import ProfileUrl from "../assets/Profile.jpeg";
+import { createContext, useContext, useState, useEffect } from "react";
+import api from "../api.js"
+import LoaderRK from "../components/Loader.jsx";
+const AuthContext = createContext();
 
-export const AuthContext = createContext(null);
 
-const AuthContextProvider = ({children}) => {
-  const [loading, setloading] = useState(false)
 
-  const user = {
-    _id: "safn,nje5fa56",
-    username: "Krishan Das",
-    email: "krishan8974783135@gmail.com",
-    role: "admin",
-    avatar: {
-      url: ProfileUrl,
-    },
-    bio: `Computer Science & Engineering student passionate about building
-              modern web applications and solving real-world problems.
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(false)
 
-              Currently focusing on building production-ready projects while
-              improving my Backend Development, MERN Stack, Flutter,
-              Data Structures & Algorithms, and exploring AI/ML.`
+  // --- page refresh ---
+  useEffect(() => {
+    const silentRefresh = async () => {
+      try {
+        setIsLoading(true)
+        const response = await api.post('/auth/refresh');
+        
+        setAccessToken(response.data?.accessToken); 
+        setUser(response.data?.user);
+        
+      } catch (error) {
+        console.log("Session expired or no refresh token found");
+        setUser(null);
+        setAccessToken(null);
+      } finally {
+        setIsLoading(false); 
+      }
+    };
 
-  }
+    silentRefresh();
+  }, []);
+
+  
 
   return (
-    <AuthContext.Provider value = {{user, loading}}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        accessToken,
+        setAccessToken,
+      }}
+    >
+      {
+        isLoading && (
+          <LoaderRK show={isLoading} message="Loading..." />
+        )
+      }
+
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
-export default AuthContextProvider;
+export function useAuth() {
+  return useContext(AuthContext);
+}

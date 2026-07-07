@@ -26,6 +26,17 @@ const userSchema = new mongoose.Schema({
     default: "user"
   },
 
+  titles: {
+    type: [String],
+    default: [
+      "Full Stack Developer",
+      "Backend Developer",
+      "Flutter Developer",
+      "Problem Solver",
+      "AI / ML Learner"
+    ]
+  },
+
   avatar: {
     url: {
       type: String,

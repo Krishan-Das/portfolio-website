@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Save, Loader2, Camera, ShieldAlert } from 'lucide-react';
+import { User, Save, Loader2, Camera, ShieldAlert, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import api from '../api/axios';
 
 const ProfileSection = () => {
-  const { user, setUser } = useAuth();
+  const { user, setUser, accessToken } = useAuth();
   
-  // Form States based on your Mongoose Model
+  // Form States strictly reflecting the updated Mongoose Model
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState('');
-  const [role, setRole] = useState('user'); // default schema fallback
+  const [role, setRole] = useState('user'); 
+  
+
+  const [titlesInput, setTitlesInput] = useState("");
   
   // Avatar handling
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -19,14 +23,20 @@ const ProfileSection = () => {
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Sync state with User Model Data
+  // Sync state with Mongoose User Model Data
   useEffect(() => {
     if (user) {
       setUsername(user?.username || "");
       setEmail(user?.email || "");
       setBio(user?.bio || "Portfolio website || RKora");
       setRole(user?.role || "user");
-      // Mapping Schema avatar object logic: avatar.url
+      
+      if (user?.titles && Array.isArray(user.titles)) {
+        setTitlesInput(user.titles.join(", "));
+      } else {
+        setTitlesInput("Full Stack Developer, Backend Developer, Flutter Developer");
+      }
+      
       setAvatarPreview(user?.avatar?.url || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.username || 'Admin'}`);
     }
   }, [user]);
@@ -35,12 +45,12 @@ const ProfileSection = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 3 * 1024 * 1024) { // 3MB local limit
-        toast.error("Image size must be less than 3MB");
+      if (file.size > 5 * 1024 * 1024) { 
+        toast.error("Image size must be less than 5MB");
         return;
       }
       setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file)); // Blob URL generation for instant preview
+      setAvatarPreview(URL.createObjectURL(file)); 
     }
   };
 
@@ -49,33 +59,31 @@ const ProfileSection = () => {
     setSaving(true);
     
     try {
-      // Backend structured Form Data payload construction
+
+      const processedTitlesArray = titlesInput
+        .split(",")
+        .map(title => title.trim())
+        .filter(title => title !== ""); 
+
+      // Backend Payload construction
       const formData = new FormData();
-      formData.append('username', username);
+      formData.append('username', username.trim());
       formData.append('bio', bio);
+      
+      formData.append('titles', JSON.stringify(processedTitlesArray));
+      
       if (avatarFile) {
-        formData.append('avatar', avatarFile); // Backend files parsing storage engine use korbe e.g Multer
+        formData.append('avatar', avatarFile); 
       }
 
-      console.log("Submitting updated structured data stream...");
+      const response = await api.patch('/auth/update', formData, {
+        headers:{
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
       
-      // Target API Logic example injection placeholder:
-      // const response = await updateProfileApi(formData);
-      
-      // Simulating API Latency 
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Context storage re-allocation structure mapping with mongoose pattern 
-      if(setUser) {
-        setUser({
-          ...user,
-          username,
-          bio,
-          avatar: {
-            ...user?.avatar,
-            url: avatarFile ? avatarPreview : user?.avatar?.url // Local dynamic replacement string
-          }
-        });
+      if(response?.data) {       
+        setUser(response?.data?.user);
       }
 
       toast.success("Admin profile configured successfully!");
@@ -92,7 +100,7 @@ const ProfileSection = () => {
       {/* Decorative Top Accent Line */}
       <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-indigo-500 via-purple-500 to-transparent opacity-50"></div>
 
-      {/* Section Header Wrapper with privileges indicator */}
+      {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-slate-800/60">
         <h2 className="text-xl font-bold flex items-center gap-2.5 text-white">
           <User className="text-indigo-400" size={22} /> Admin Information
@@ -104,7 +112,7 @@ const ProfileSection = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         
-        {/* --- DYNAMIC AVATAR HANDLER (Schema: avatar.url Mapping) --- */}
+        {/* --- DYNAMIC AVATAR HANDLER --- */}
         <div className="flex flex-col items-center sm:flex-row gap-5 bg-slate-950/40 p-4 rounded-xl border border-slate-800/50">
           <div className="relative group/avatar">
             <div className="w-24 h-24 rounded-2xl overflow-hidden bg-slate-800 border-2 border-indigo-500/30 group-hover/avatar:border-indigo-500 transition-all duration-300 shadow-lg">
@@ -115,7 +123,6 @@ const ProfileSection = () => {
               />
             </div>
             
-            {/* Custom Interactive Click Overlay */}
             <button
               type="button"
               onClick={() => fileInputRef.current.click()}
@@ -171,6 +178,24 @@ const ProfileSection = () => {
               title="Email updates require multi-factor verification pipeline protection."
             />
           </div>
+        </div>
+
+        {/* --- 🛠️ DYNAMIC TITLES / TAGLINES INPUT (For Hero Section Animation) --- */}
+        <div>
+          <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+            <Sparkles size={12} className="text-indigo-400" /> Animated Hero Titles
+          </label>
+          <p className="text-[11px] text-slate-500 mb-2">
+            Separate each role with a comma. These will stream inside your home page banner loop.
+          </p>
+          <input
+            type="text"
+            value={titlesInput}
+            onChange={(e) => setTitlesInput(e.target.value)}
+            placeholder="Full Stack Developer, Backend Developer, Problem Solver"
+            className="w-full bg-slate-950/60 border border-slate-800 focus:border-indigo-500/80 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all duration-200"
+            required
+          />
         </div>
 
         {/* --- BIO ELEMENT --- */}

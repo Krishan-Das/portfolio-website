@@ -78,7 +78,6 @@ export async function fetchPost(req, res) {
   } catch (error) {
     console.error("Fetch projects error:", error);
     return res.status(500).json({
-      errorMsg: error.message,
       message: "Internal server problem",
     });
   }
@@ -111,10 +110,7 @@ export async function updatePost(req, res) {
     }
 
     if (file) {
-      // --- delete prev image from imagekit
-      if (project.image?.fileId) {
-        await deleteFile(project.image.fileId);
-      }
+      
 
       // --- upload new image into imagekit ---
       const uploadResponse = await uploadFile(
@@ -128,6 +124,11 @@ export async function updatePost(req, res) {
         return res.status(500).json({
           message: "Image upload failed"
         });
+      }
+      
+      // --- delete prev image from imagekit
+      if (project.image?.fileId) {
+        await deleteFile(project.image.fileId);
       }
 
       project.image.url = uploadResponse.url;
@@ -184,6 +185,46 @@ export async function deletePost(req, res) {
     console.error("Delete project error:", error);
     return res.status(500).json({
       message: "Internal server problem",
+    });
+  }
+}
+
+
+// --- User side ---
+export async function fetchFeaturedProj(req, res) {
+  const userId = req.user.id;
+
+  try {
+    const projects = await projectModel.find({ user: userId, featured: true});
+
+    res.status(200).json({
+      message: "Featured projects fetched successfully",
+      projects
+    })
+  } catch (error) {
+    console.error("Fetch projects error:", error);
+    return res.status(500).json({
+      message: "Internal server problem",
+    });
+  }
+}
+
+
+// --- total project counts ---
+export async function getProjectCount(req, res) {
+  try {
+    const userId = req.user.id;
+
+    const totalProjects = await projectModel.countDocuments({
+      user: userId,
+    });
+
+    return res.status(200).json({
+      totalProjects,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
     });
   }
 }

@@ -6,6 +6,7 @@ import crypto from "crypto"
 import jwt from "jsonwebtoken"
 import config from "../config/config.js"
 import { ref } from "process"
+import {uploadFile, deleteFile} from "../services/imagekit.service.js"
 
 // --- Register User ---
 export async function registerUser(req, res) {
@@ -184,13 +185,14 @@ export async function loginUser(req, res) {
 
     res.status(200).json({
       message: "Logged in successfully",
-      user: {
+      user:{
         _id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role,
         avatar: user.avatar,
         bio: user.bio,
+        role: user.role,
+        titles: user.titles,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       },
@@ -269,11 +271,15 @@ export async function refreshTokens(req, res) {
       message: "Access token refreshed successfully",
       accessToken,
       user:{
-        id: user._id,
+        _id: user._id,
         username: user.username,
         email: user.email,
+        avatar: user.avatar,
+        bio: user.bio,
         role: user.role,
-        avatar: user.avatar
+        titles: user.titles,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
       }
     })
 
@@ -396,4 +402,84 @@ export async function logoutAllUser(req, res) {
     });
   }
 
+}
+
+
+
+// --- Update user details ---
+export async function updateUser(req, res) {
+  const { username, bio } = req.body;
+  const titles = JSON.parse(req.body.titles);
+
+  const userId = req.user.id;
+  const file = req.file;
+
+  try {
+
+    const user = await userModel.findById(userId);
+    
+    if(!username?.trim() || !titles || !bio?.trim()){
+      return res.status(400).json({
+        message: "All fields are required"
+      })
+    }
+
+    // --- update profile pic ---
+    if (file) {
+      
+      // --- upload new image into imagekit ---
+      const uploadResponse = await uploadFile(
+        file,
+        file.originalname,
+        userId,
+        "portfolio/profile"
+      );
+
+      if (!uploadResponse) {
+        return res.status(500).json({
+          message: "Image upload failed"
+        });
+      }
+
+      // --- delete prev profileImage from imagekit
+      if (user.avatar?.fileId) {
+        await deleteFile(user.avatar?.fileId);
+      }
+
+      
+
+      user.avatar = {
+        url: uploadResponse.url,
+        fileId: uploadResponse.fileId,
+      };
+    }
+
+    if (username !== undefined) user.username = username;
+    if (titles !== undefined) user.titles = titles;
+    if (bio !== undefined) user.bio = bio;
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      user:{
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        bio: user.bio,
+        role: user.role,
+        titles: user.titles,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }
+    })
+
+  } catch (error) {
+    console.error("Update User Error:", error);
+    return res.status(500).json({
+      errorMsg: error.message,
+      message: "Internal server problem",
+    });
+  }
 }

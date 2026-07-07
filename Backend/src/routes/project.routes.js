@@ -15,4 +15,9 @@ projectRouter.patch("/update/:id", upload.single("image"), authenticate, project
 
 projectRouter.delete("/delete/:id", authenticate, projectController.deletePost);
 
+// --- User Side ---
+projectRouter.get("/featured-projects", authenticate, projectController.fetchFeaturedProj);
+
+projectRouter.get('/count', authenticate, projectController.getProjectCount);
+
 export default projectRouter;

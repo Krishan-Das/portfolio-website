@@ -1,15 +1,40 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { TypeAnimation } from "react-type-animation";
 import { ArrowRight, Download, ChevronDown } from "lucide-react";
-import {AuthContext} from "../context/AuthContext.jsx"
 
 import ProfilePic from "../assets/Profile.jpeg"
+import { useAuth } from '../context/AuthContext';
+import api from '../api';
 
 const HeroSection = () => {
-  const {user} = useContext(AuthContext);
-  
+  const { user, accessToken } = useAuth();
+  // --- hero titles ---
+  const sequence = user?.titles?.flatMap((title) => [title, 1800]) || [];
 
-  
+  // --- toal project counts ---
+  const [totalProjects, setTotalProjects] = useState(0);
+
+  useEffect(()=>{
+    if(!user) return;
+    const totalProjectsCount = async ()=>{
+      try {
+        const response = await api.get("project/count", {
+          headers:{
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        if(response?.data){
+          setTotalProjects(response?.data?.totalProjects);
+        }
+      } catch (error) {
+        console.error("Project Count Fetch:", error)
+      }
+    }
+    totalProjectsCount();
+  },[user])
+
+
+
   return (
     <section
       id="home"
@@ -68,39 +93,17 @@ const HeroSection = () => {
             {/* Animated */}
 
             <div className="mt-2 h-12">
+              {user?.titles?.length > 0 && (
+                <TypeAnimation
+                  sequence={user.titles.flatMap(title => [title, 1800])}
+                  wrapper="span"
+                  speed={45}
+                  repeat={Infinity}
+                  cursor
+                  className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-indigo-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent"
+                />
+              )}
 
-              <TypeAnimation
-
-                sequence={[
-
-                  "Full Stack Developer",
-                  1800,
-
-                  "Backend Developer",
-                  1800,
-
-                  "Flutter Developer",
-                  1800,
-
-                  "Problem Solver",
-                  1800,
-
-                  "AI / ML Learner",
-                  1800,
-
-                ]}
-
-                wrapper="span"
-
-                speed={45}
-
-                repeat={Infinity}
-
-                cursor={true}
-
-                className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-indigo-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent"
-
-              />
 
             </div>
 
@@ -227,7 +230,7 @@ const HeroSection = () => {
                 <div className="rounded-2xl border border-slate-800 bg-slate-900/90 backdrop-blur-xl px-5 py-4 shadow-xl">
 
                   <p className="text-3xl font-bold text-cyan-400">
-                    20+
+                    {totalProjects}+
                   </p>
 
                   <p className="text-sm text-slate-400">
