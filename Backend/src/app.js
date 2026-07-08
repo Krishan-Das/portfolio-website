@@ -1,6 +1,7 @@
 import express from "express"
 import authRouter from "./routes/auth.routes.js";
 import projectRouter from "./routes/project.routes.js";
+import skillRouter from "./routes/skill.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors"
 
@@ -22,6 +23,7 @@ app.use(
 
 app.use("/api/auth", authRouter);
 app.use("/api/project", projectRouter);
+app.use("/api/skill", skillRouter);
 
 
 export default app;
